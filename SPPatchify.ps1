@@ -89,7 +89,7 @@ Function CopyEXE($action) {
         if ($addr -ne $env:computername) {
 
             # Dynamic open PSSesion
-            $cmd = "`$s = New-PSSession -ComputerName `$env:computername -Credential `$global:cred -Authentication CredSSP"
+            $cmd = "`$s = New-PSSession -ComputerName `$addr -Credential `$global:cred -Authentication CredSSP"
             if ($remoteSessionPort) { $cmd += " -Port $remoteSessionPort"}
             if ($remoteSessionSSL) { $cmd += " -UseSSL"}
             $sb = [Scriptblock]::Create($cmd)
@@ -242,7 +242,7 @@ Function WaitEXE($patchName) {
                 # Count MSPLOG files
                 $cmd = "`$f=Get-ChildItem ""$root\log\*MSPLOG*"";`$c=`$f.count;`$l=(`$f|sort last -desc|select -first 1).LastWriteTime;`$s=`$env:computername;New-Object -TypeName PSObject -Prop (@{""Server""=`$s;""Count""=`$c;""LastWriteTime""=`$l})"
                 $sb = [Scriptblock]::Create($cmd)
-                $msp = Invoke-Command -Session (Get-PSSession) -ScriptBlock $sb
+                $msp = Invoke-Command -Session (New-PSSession) -ScriptBlock $sb
                 $msp = $msp | select Server, @{n = "MSPCount"; e = {$_.Count}}, LastWriteTime | sort LastWriteTime, Server -desc
                 
                 # HTML view
